@@ -1,7 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:uhome/home_screen.dart';
 import 'package:uhome/registerpage.dart';
 import 'reset_password_screen.dart';
+import 'package:http/http.dart' as http;
+import 'package:get/get.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -12,6 +16,9 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   bool _obscurePassword = true;
+
+  TextEditingController emailC = TextEditingController();
+  TextEditingController passwordC = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -132,6 +139,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ],
       ),
       child: TextFormField(
+        controller: emailC,
         decoration: InputDecoration(
           prefixIcon: Icon(Icons.email_outlined, color: Colors.blue.shade700),
           hintText: 'Email',
@@ -169,6 +177,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ],
       ),
       child: TextFormField(
+        controller: passwordC,
         obscureText: _obscurePassword,
         decoration: InputDecoration(
           prefixIcon: Icon(Icons.lock_outline, color: Colors.blue.shade700),
@@ -183,7 +192,7 @@ class _LoginScreenState extends State<LoginScreen> {
               });
             },
           ),
-          hintText: 'Kata Sandi',
+          hintText: 'Password',
           hintStyle: TextStyle(
             color: Colors.grey.shade500,
             fontStyle: FontStyle.italic,
@@ -237,13 +246,7 @@ class _LoginScreenState extends State<LoginScreen> {
         await Future.delayed(const Duration(seconds: 1));
 
         // Tutup dialog loading
-        if (context.mounted) {
-          Navigator.of(context).pop(); // Tutup dialog
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const HomeScreen()),
-          );
-        }
+        handlelogin(context, emailC, passwordC);
       },
       child: const Text(
         'Masuk',
@@ -303,5 +306,60 @@ void _showLoadingDialog(BuildContext context) {
         ),
       ],
     );
+  }
+
+  void tutupLoading(BuildContext context) {
+    if (context.mounted) {
+      Navigator.of(context).pop(); // Tutup dialog
+    }
+  }
+
+  Future<void> handlelogin(BuildContext context, TextEditingController emailC, TextEditingController passwordC) async {
+    try {
+      var responses = await http.post(
+        Uri.parse('http://127.0.0.1:5000/login'),
+        headers: {
+          'Content-Type' : 'application/json',
+        },
+        body: jsonEncode({
+          'email': emailC.text,
+          'password': passwordC.text
+        })
+      );
+      if (!context.mounted) return;
+
+      if (responses.statusCode == 200) {
+        Map<String, dynamic> theData = jsonDecode(responses.body);
+        if(theData['status'] == 'success') {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: Colors.green,
+              showCloseIcon: true,
+              content: Text('Login berhasil')
+            )
+          );
+          tutupLoading(context);
+          Get.to(() => HomeScreen());
+        } else if(theData['status'] == 'error') {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: const Color.fromARGB(255, 255, 0, 0),
+              showCloseIcon: true,
+              content: Text('Mungkin ${theData['msg']}')
+            )
+          );
+           tutupLoading(context);
+        }
+      }
+    } catch(e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: const Color.fromARGB(255, 255, 0, 0),
+          showCloseIcon: true,
+          content: Text('Kesalahan terjadi')
+        )
+      );
+       tutupLoading(context);
+    }
   }
 }
