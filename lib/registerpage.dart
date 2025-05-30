@@ -1,5 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:uhome/home_screen.dart';
+import 'package:get/get.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -12,8 +15,11 @@ class _RegisterPageState extends State<RegisterPage> {
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
-  final TextEditingController _confirmPasswordController =
-      TextEditingController();
+  TextEditingController namaC = TextEditingController();
+  TextEditingController emailC = TextEditingController();
+  TextEditingController passwordC = TextEditingController();
+  TextEditingController confirmpasswordC = TextEditingController();
+  TextEditingController notelpC = TextEditingController();
 
   void _showLoadingDialog(BuildContext context) {
     showDialog(
@@ -35,10 +41,88 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
+  void tutupLoading(BuildContext context) {
+    if (context.mounted) {
+      Navigator.of(context).pop();
+    }
+  }
+
+  Future<void> _registerUser() async { // hapus parameter 'responses'
+  _showLoadingDialog(context);
+
+  final url = Uri.parse(
+    'http://127.0.0.1:5000/register',
+  );
+
+  try {
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: jsonEncode({
+        'nama': namaC.text,
+        'email': emailC.text,
+        'password': passwordC.text,
+        'confirmpassword': confirmpasswordC.text,
+        'telepon': notelpC.text,
+      }),
+    );
+
+    if (!context.mounted) return;
+
+    if (response.statusCode == 200) { // gunakan 'response' bukan 'responses'
+      Map<String, dynamic> theData = jsonDecode(response.body);
+      if (theData['status'] == 'success') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: Colors.green,
+            showCloseIcon: true,
+            content: const Text('Registrasi berhasil'),
+          ),
+        );
+        tutupLoading(context);
+        Get.to(() => const HomeScreen());
+      } else if (theData['status'] == 'error') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: const Color.fromARGB(255, 255, 0, 0),
+            showCloseIcon: true,
+            content: Text('Mungkin ${theData['msg']}'),
+          ),
+        );
+        tutupLoading(context);
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: const Color.fromARGB(255, 255, 0, 0),
+          showCloseIcon: true,
+          content: const Text('Terjadi kesalahan pada server'),
+        ),
+      );
+      tutupLoading(context);
+    }
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: const Color.fromARGB(255, 255, 0, 0),
+        showCloseIcon: true,
+        content: const Text('Kesalahan terjadi'),
+      ),
+    );
+    tutupLoading(context);
+  }
+}
+
+
   @override
   void dispose() {
-    _confirmPasswordController.dispose();
-    super.dispose();
+    namaC.dispose();
+    emailC.dispose();
+    passwordC.dispose();
+    confirmpasswordC.dispose();
+    notelpC.dispose();
   }
 
   @override
@@ -96,23 +180,19 @@ class _RegisterPageState extends State<RegisterPage> {
                           ),
                         ),
                         const SizedBox(height: 32),
-                        _buildTextField(Icons.person_outline, 'Nama Lengkap'),
+                        _buildTextField(Icons.person_outline, 'Nama Lengkap', namaC),
                         const SizedBox(height: 14),
-                        _buildTextField(Icons.email_outlined, 'Email'),
+                        _buildTextField(Icons.email_outlined, 'Email', emailC),
                         const SizedBox(height: 14),
                         _buildPasswordField(),
                         const SizedBox(height: 14),
                         _buildConfirmPasswordField(),
                         const SizedBox(height: 14),
-                        _buildTextField(
-                          Icons.phone_outlined,
-                          'No Telepon',
-                          keyboardType: TextInputType.phone,
-                        ),
+                        _buildTextField( Icons.phone_outlined, 'No Telepon', notelpC, keyboardType: TextInputType.phone),
                         const SizedBox(height: 32),
-                        _buildRegisterButton(context),
+                        _buildRegisterButton(),
                         const SizedBox(height: 16),
-                        _buildLoginLink(context),
+                        _buildLoginLink(),
                       ],
                     ),
                   ),
@@ -127,7 +207,8 @@ class _RegisterPageState extends State<RegisterPage> {
 
   Widget _buildTextField(
     IconData icon,
-    String hintText, {
+    String hintText,
+    TextEditingController controller, {
     TextInputType keyboardType = TextInputType.text,
   }) {
     return Container(
@@ -144,6 +225,7 @@ class _RegisterPageState extends State<RegisterPage> {
         ],
       ),
       child: TextFormField(
+        controller: controller,
         keyboardType: keyboardType,
         decoration: InputDecoration(
           prefixIcon: Icon(icon, color: Colors.blue.shade700),
@@ -168,55 +250,40 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Widget _buildPasswordField() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: TextFormField(
-        obscureText: _obscurePassword,
-        decoration: InputDecoration(
-          prefixIcon: Icon(Icons.lock_outline, color: Colors.blue.shade700),
-          suffixIcon: IconButton(
-            icon: Icon(
-              _obscurePassword ? Icons.visibility_off : Icons.visibility,
-              color: Colors.blue.shade700,
-            ),
-            onPressed: () {
-              setState(() {
-                _obscurePassword = !_obscurePassword;
-              });
-            },
-          ),
-          hintText: 'Kata Sandi',
-          hintStyle: TextStyle(
-            color: Colors.grey.shade500,
-            fontStyle: FontStyle.italic,
-          ),
-          filled: true,
-          fillColor: Colors.transparent,
-          contentPadding: const EdgeInsets.symmetric(
-            vertical: 18,
-            horizontal: 20,
-          ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
-          ),
-        ),
-      ),
+    return _buildTextFieldWithToggle(
+      icon: Icons.lock_outline,
+      hintText: 'Password',
+      controller: passwordC,
+      obscureText: _obscurePassword,
+      onToggle: () {
+        setState(() {
+          _obscurePassword = !_obscurePassword;
+        });
+      },
     );
   }
 
   Widget _buildConfirmPasswordField() {
+    return _buildTextFieldWithToggle(
+      icon: Icons.lock,
+      hintText: 'Ulangi Kata Sandi',
+      controller: confirmpasswordC,
+      obscureText: _obscureConfirmPassword,
+      onToggle: () {
+        setState(() {
+          _obscureConfirmPassword = !_obscureConfirmPassword;
+        });
+      },
+    );
+  }
+
+  Widget _buildTextFieldWithToggle({
+    required IconData icon,
+    required String hintText,
+    required TextEditingController controller,
+    required bool obscureText,
+    required VoidCallback onToggle,
+  }) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -231,22 +298,18 @@ class _RegisterPageState extends State<RegisterPage> {
         ],
       ),
       child: TextFormField(
-        controller: _confirmPasswordController,
-        obscureText: _obscureConfirmPassword,
+        controller: controller,
+        obscureText: obscureText,
         decoration: InputDecoration(
-          prefixIcon: Icon(Icons.lock, color: Colors.blue.shade700),
+          prefixIcon: Icon(icon, color: Colors.blue.shade700),
           suffixIcon: IconButton(
             icon: Icon(
-              _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
+              obscureText ? Icons.visibility_off : Icons.visibility,
               color: Colors.blue.shade700,
             ),
-            onPressed: () {
-              setState(() {
-                _obscureConfirmPassword = !_obscureConfirmPassword;
-              });
-            },
+            onPressed: onToggle,
           ),
-          hintText: 'Ulangi Kata Sandi',
+          hintText: hintText,
           hintStyle: TextStyle(
             color: Colors.grey.shade500,
             fontStyle: FontStyle.italic,
@@ -266,7 +329,7 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  Widget _buildRegisterButton(BuildContext context) {
+  Widget _buildRegisterButton() {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -293,23 +356,7 @@ class _RegisterPageState extends State<RegisterPage> {
           padding: const EdgeInsets.symmetric(vertical: 16),
           minimumSize: const Size(double.infinity, 50),
         ),
-        onPressed: () async {
-          _showLoadingDialog(context);
-          await Future.delayed(const Duration(seconds: 1));
-
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Akun berhasil dibuat (dummy)!')),
-          );
-
-          if (context.mounted) {
-            Navigator.of(context).pop(); // Tutup dialog
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const HomeScreen()),
-            );
-          }
-        },
-
+        onPressed: _registerUser,
         child: const Text(
           'Daftar',
           style: TextStyle(
@@ -322,7 +369,7 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  Widget _buildLoginLink(BuildContext context) {
+  Widget _buildLoginLink() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -332,7 +379,7 @@ class _RegisterPageState extends State<RegisterPage> {
         ),
         TextButton(
           onPressed: () {
-            Navigator.pop(context); // Kembali ke halaman login
+            Navigator.pop(context); // kembali ke login
           },
           child: Text(
             'Masuk',

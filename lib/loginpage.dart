@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:uhome/home_screen.dart';
 import 'package:uhome/registerpage.dart';
@@ -76,12 +75,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         const SizedBox(height: 40),
 
-                        // Email Field
                         _buildEmailField(),
 
                         const SizedBox(height: 20),
 
-                        // Password Field with hide/unhide
                         _buildPasswordField(),
 
                         const SizedBox(height: 32),
@@ -242,10 +239,8 @@ class _LoginScreenState extends State<LoginScreen> {
       onPressed: () async {
         _showLoadingDialog(context);
 
-        // Simulasi proses login
         await Future.delayed(const Duration(seconds: 1));
 
-        // Tutup dialog loading
         handlelogin(context, emailC, passwordC);
       },
       child: const Text(
@@ -310,7 +305,7 @@ void _showLoadingDialog(BuildContext context) {
 
   void tutupLoading(BuildContext context) {
     if (context.mounted) {
-      Navigator.of(context).pop(); // Tutup dialog
+      Navigator.of(context).pop();
     }
   }
 
