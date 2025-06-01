@@ -266,7 +266,7 @@ class _RegisterPageState extends State<RegisterPage> {
   Widget _buildConfirmPasswordField() {
     return _buildTextFieldWithToggle(
       icon: Icons.lock,
-      hintText: 'Ulangi Kata Sandi',
+      hintText: 'Ulangi Password',
       controller: confirmpasswordC,
       obscureText: _obscureConfirmPassword,
       onToggle: () {

@@ -20,6 +20,21 @@ class _PredictionScreenState extends State<PredictionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF0D47A1),
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        title: const Text(
+          'Prediksi Harga',
+          style: TextStyle(color: Colors.white),
+        ),
+        centerTitle: true,
+      ),
       body: Container(
         width: double.infinity,
         height: double.infinity,
@@ -97,13 +112,17 @@ class _PredictionScreenState extends State<PredictionScreen> {
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF3E64FF),
+                          elevation: 0, // Hapus stroke (shadow halus, biar lebih flat)
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
                         child: const Text(
                           'Prediksi Sekarang',
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),

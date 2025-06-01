@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart'; // Tambahkan ini
 import 'loginpage.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -15,6 +19,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
     'tentangKami': false,
     'hubungiKami': false,
   };
+  String idUser = '';
+  String nama = '';
+  String email = '';
+  String telepon = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _getDataUser();
+  }
+
+  Future<void> _getDataUser() async {
+    try{
+      final prefs = await SharedPreferences.getInstance();
+      setState(() {
+        idUser = prefs.getString('id_user')!;
+        nama = prefs.getString('nama')!;
+        email = prefs.getString('email')!;
+        telepon = prefs.getString('telepon')!;
+      });
+    }catch(e){
+      print(e);
+    }
+  }
 
   void _toggle(String key) {
     setState(() {
@@ -134,7 +162,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
-        children: const [
+        children: [
           Text(
             'SELAMAT DATANG',
             style: TextStyle(
@@ -145,7 +173,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           SizedBox(height: 6),
           Text(
-            'username@gmail.com',
+            nama,
             style: TextStyle(color: Colors.white70, fontSize: 14),
           ),
         ],

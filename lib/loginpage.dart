@@ -5,6 +5,7 @@ import 'package:uhome/registerpage.dart';
 import 'reset_password_screen.dart';
 import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -334,7 +335,16 @@ void _showLoadingDialog(BuildContext context) {
             )
           );
           tutupLoading(context);
-          Get.to(() => HomeScreen());
+          final prefs = await SharedPreferences.getInstance();
+          Map<String, dynamic> data_user = theData['data_user'];
+          await prefs.setString('id_user', data_user['id_user']);
+          await prefs.setString('nama', data_user['nama']);
+          await prefs.setString('email', data_user['email']);
+          await prefs.setString('telepon', data_user['telepon']);
+
+          await prefs.setBool('isLoggedin', true);
+
+          Get.offAll(() => HomeScreen());
         } else if(theData['status'] == 'error') {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -351,7 +361,7 @@ void _showLoadingDialog(BuildContext context) {
         SnackBar(
           backgroundColor: const Color.fromARGB(255, 255, 0, 0),
           showCloseIcon: true,
-          content: Text('Kesalahan terjadi')
+          content: Text('Email Atau Password Salah')
         )
       );
        tutupLoading(context);
