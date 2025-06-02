@@ -81,26 +81,94 @@ class _ProfileScreenState extends State<ProfileScreen> {
             color: Colors.black87,
             child: Column(
               children: [
-                _buildAnimatedTile(
-                  keyName: 'tentangKami',
-                  icon: Icons.info_outline,
-                  title: 'Tentang Kami',
-                  color: Colors.black87,
-                  child: ListTile(
-                    title: const Text('Ini adalah aplikasi UHome.'),
-                    onTap: () {},
-                  ),
-                ),
-                _buildAnimatedTile(
-                  keyName: 'hubungiKami',
-                  icon: Icons.phone,
-                  title: 'Hubungi Kami',
-                  color: Colors.black87,
-                  child: ListTile(
-                    title: const Text('Hubungi kami via WhatsApp'),
-                    onTap: () => _launchWhatsApp(context),
-                  ),
-                ),
+                Padding(
+  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
+  child: GestureDetector(
+    onTap: () {
+      // Aksi Tentang Kami
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Tentang Kami'),
+          content: const Text('Ini adalah aplikasi UHome.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(ctx).pop();
+              },
+              child: const Text('Tutup'),
+            ),
+          ],
+        ),
+      );
+    },
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 4,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: const [
+          Icon(Icons.info_outline, size: 24, color: Colors.black87),
+          SizedBox(width: 12),
+          Text(
+            'Tentang Kami',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+            ),
+          ),
+          Spacer(),
+        ],
+      ),
+    ),
+  ),
+),
+Padding(
+  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
+  child: GestureDetector(
+    onTap: () => _launchWhatsApp(context),
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 4,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: const [
+          Icon(Icons.phone, size: 24, color: Colors.black87),
+          SizedBox(width: 12),
+          Text(
+            'Hubungi Kami',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+            ),
+          ),
+          Spacer(),
+        ],
+      ),
+    ),
+  ),
+),
+
               ],
             ),
           ),

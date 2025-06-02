@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'uhome',
-      home: LoginScreen(), // <--- ini yang bikin tampilannya muncul
+      home: LoginScreen(),
     );
   }
 }
